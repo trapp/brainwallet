@@ -255,13 +255,13 @@
     <mkdir dir="${artifact.temp.output.brainwallet:jar}"/>
     <jar destfile="${temp.jar.path.BrainWallet.jar}" duplicate="preserve" filesetmanifest="mergewithoutmain">
       <zipfileset dir="${brainwallet.output.dir}"/>
-      <zipfileset src="${basedir}/lib/guava-14.0.1.jar"/>
-      <zipfileset src="${basedir}/lib/sc-light-jdk15on-1.47.0.2.jar"/>
-      <zipfileset src="${basedir}/lib/slf4j-jcl-1.7.5.jar"/>
-      <zipfileset src="${basedir}/lib/bitcoinj-0.8.jar"/>
       <zipfileset src="${basedir}/lib/commons-logging-1.1.2.jar"/>
-      <zipfileset src="${basedir}/lib/forms_rt.jar"/>
+      <zipfileset src="${basedir}/lib/sc-light-jdk15on-1.47.0.2.jar"/>
       <zipfileset src="${basedir}/lib/slf4j-api-1.7.5.jar"/>
+      <zipfileset src="${basedir}/lib/forms_rt.jar"/>
+      <zipfileset src="${basedir}/lib/bitcoinj-0.8.jar"/>
+      <zipfileset src="${basedir}/lib/slf4j-jcl-1.7.5.jar"/>
+      <zipfileset src="${basedir}/lib/guava-14.0.1.jar"/>
     </jar>
     <copy file="${temp.jar.path.BrainWallet.jar}" tofile="${artifact.temp.output.brainwallet:jar}/BrainWallet.jar"/>
   </target>
