@@ -1,4 +1,4 @@
-package net.zaeda.coinaddress;
+package net.zaeda.brainwallet;
 
 import com.google.bitcoin.core.Address;
 import com.google.bitcoin.core.DumpedPrivateKey;
@@ -6,6 +6,7 @@ import com.google.bitcoin.core.ECKey;
 import com.google.bitcoin.core.NetworkParameters;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.intellij.uiDesigner.core.Spacer;
 import org.spongycastle.util.encoders.Hex;
 
 import javax.swing.*;
@@ -14,6 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.MessageDigest;
@@ -29,6 +31,7 @@ public class AddressForm {
     private JTextField addressField;
     private JTextField privateKeyField;
     private JButton lookUpButton;
+    private JTabbedPane tabbedPane1;
 
     Map<Character, Character> easy16HexToEasy = new HashMap<Character, Character>();
 
@@ -61,6 +64,12 @@ public class AddressForm {
                     MessageDigest sha512 = MessageDigest.getInstance("SHA-512");
                     byte[] secretBytes = sha512.digest(secret.getBytes("UTF-8"));
 
+                    byte[] rootCode = new byte[16];
+                    System.arraycopy(secretBytes, 0, rootCode, 0, 16);
+
+                    byte[] chainCode = new byte[16];
+                    System.arraycopy(secretBytes, 16, chainCode, 0, 16);
+
                     // Root and Chain key with appended checksum.
                     byte[][] lines = {new byte[18], new byte[18], new byte[18], new byte[18]};
 
@@ -81,8 +90,13 @@ public class AddressForm {
                     // * Convert the bytes to hex.
                     // * Convert the hex characters to armorys "easy16" characters. (See easy16HexToEasy for a list).
                     StringBuilder output = new StringBuilder();
+                    int i = 0;
                     for (byte[] bytes : lines) {
-                        output.append(easify(new String(Hex.encode(bytes)))).append("\n");
+                        output.append(easify(new String(Hex.encode(bytes))));
+                        i++;
+                        if (i < lines.length) {
+                            output.append("\n");
+                        }
                     }
 
                     outputField.setText(output.toString());
@@ -93,7 +107,7 @@ public class AddressForm {
                     outputField.setText("Error: " + e.getMessage());
                 }
 
-                AdressCreator creator = new AdressCreator();
+                AddressCreator creator = new AddressCreator();
                 ECKey key = creator.createAddress(secretField.getText());
                 DumpedPrivateKey privateKey = key.getPrivateKeyEncoded(NetworkParameters.prodNet());
                 Address address = key.toAddress(NetworkParameters.prodNet());
@@ -160,41 +174,58 @@ public class AddressForm {
      */
     private void $$$setupUI$$$() {
         container = new JPanel();
-        container.setLayout(new GridLayoutManager(5, 3, new Insets(10, 10, 10, 10), -1, -1));
+        container.setLayout(new GridLayoutManager(3, 3, new Insets(10, 10, 10, 10), -1, -1));
         container.setMinimumSize(new Dimension(500, 110));
-        container.setPreferredSize(new Dimension(600, 250));
+        container.setPreferredSize(new Dimension(620, 240));
         final JLabel label1 = new JLabel();
         label1.setText("Secret");
         container.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         secretField = new JTextField();
         container.add(secretField, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        final JLabel label2 = new JLabel();
-        label2.setText("Armory Paper Backup");
-        container.add(label2, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        outputField = new JTextArea();
-        outputField.setEditable(false);
-        outputField.setFont(new Font("Monospaced", outputField.getFont().getStyle(), 14));
-        container.add(outputField, new GridConstraints(2, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
         calculateButton = new JButton();
         calculateButton.setText("Calculate");
         container.add(calculateButton, new GridConstraints(1, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        tabbedPane1 = new JTabbedPane();
+        container.add(tabbedPane1, new GridConstraints(2, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
+        final JPanel panel1 = new JPanel();
+        panel1.setLayout(new GridLayoutManager(2, 2, new Insets(10, 10, 10, 10), -1, -1));
+        tabbedPane1.addTab("Armory Wallet", panel1);
+        final JLabel label2 = new JLabel();
+        label2.setText("Armory Paper Backup");
+        panel1.add(label2, new GridConstraints(0, 0, 2, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        outputField = new JTextArea();
+        outputField.setEditable(false);
+        outputField.setFont(new Font("Monospaced", outputField.getFont().getStyle(), 14));
+        outputField.setMargin(new Insets(10, 10, 10, 10));
+        panel1.add(outputField, new GridConstraints(0, 1, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
+        final JPanel panel2 = new JPanel();
+        panel2.setLayout(new GridLayoutManager(4, 3, new Insets(10, 10, 10, 10), -1, -1));
+        tabbedPane1.addTab("Single Bitcoin Address", panel2);
         final JLabel label3 = new JLabel();
         label3.setText("Bitcoin Private Key");
-        container.add(label3, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(label3, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label4 = new JLabel();
+        label4.setText("Bitcoin Address");
+        panel2.add(label4, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         privateKeyField = new JTextField();
         privateKeyField.setEditable(false);
         privateKeyField.setFont(new Font("Monospaced", privateKeyField.getFont().getStyle(), 14));
-        container.add(privateKeyField, new GridConstraints(3, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        final JLabel label4 = new JLabel();
-        label4.setText("Bitcoin Address");
-        container.add(label4, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(privateKeyField, new GridConstraints(2, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         addressField = new JTextField();
         addressField.setEditable(false);
         addressField.setFont(new Font("Monospaced", addressField.getFont().getStyle(), 14));
-        container.add(addressField, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        panel2.add(addressField, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         lookUpButton = new JButton();
         lookUpButton.setText("Look up");
-        container.add(lookUpButton, new GridConstraints(4, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(lookUpButton, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label5 = new JLabel();
+        label5.setFont(new Font(label5.getFont().getName(), label5.getFont().getStyle(), 9));
+        label5.setText("Be careful when sending funds from this address. Most clients create new change addresses not covered by this private key.");
+        panel2.add(label5, new GridConstraints(0, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label6 = new JLabel();
+        label6.setFont(new Font(label6.getFont().getName(), label6.getFont().getStyle(), 9));
+        label6.setText("You should prefer \"Armory Wallet\" for future proof deterministic address generation based on your secret.");
+        panel2.add(label6, new GridConstraints(1, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**

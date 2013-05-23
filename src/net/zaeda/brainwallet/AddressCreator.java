@@ -1,4 +1,4 @@
-package net.zaeda.coinaddress;
+package net.zaeda.brainwallet;
 
 import com.google.bitcoin.core.ECKey;
 
@@ -6,7 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class AdressCreator {
+public class AddressCreator {
     public ECKey createAddress(String secret) {
         byte[] hash = null;
 

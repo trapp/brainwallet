@@ -1,4 +1,4 @@
-package net.zaeda.coinaddress;
+package net.zaeda.brainwallet;
 
 import javax.swing.*;
 
