@@ -6,7 +6,6 @@ import com.google.bitcoin.core.ECKey;
 import com.google.bitcoin.core.NetworkParameters;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.intellij.uiDesigner.core.Spacer;
 import org.spongycastle.util.encoders.Hex;
 
 import javax.swing.*;
@@ -15,7 +14,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.MessageDigest;
